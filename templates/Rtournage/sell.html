@@ -1,0 +1,118 @@
+{% extends 'layout.html' %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/dt-1.10.20/datatables.min.css"/>
+{% endblock %}
+
+{% block content %}
+    <div class="container mt-3">
+        <h1>
+            Ventes
+            <button class="btn btn-outline-dark mr-3" data-toggle="modal" data-target="#myModal"><i
+                    class="fa fa-plus"></i> Ajouter des ventes
+            </button>
+        </h1>
+        <hr class="mb-5">
+        <!-- The Modal -->
+        <div class="modal fade" id="myModal">
+            <form action="{% url 'Rtournage:add_sell' %}" method="post">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+
+                        <!-- Modal Header -->
+                        <div class="modal-header">
+                            <h4 class="modal-title">Ajout d'achats</h4>
+                            <button type="button" class="close" data-dismiss="modal">x</button>
+                        </div>
+
+                        <!-- Modal body -->
+                        <div class="modal-body">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <select class="custom-select" name="prod_id">
+                                    <option selected="" disabled>Sélectionner un produit</option>
+                                    {% for product in products %}
+                                        <option value="{{ product.id }}">{{ product }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <label class="col-form-label col-form-label-sm" for="inputSmall">Qantité</label>
+                            <input class="form-control form-control-sm" type="number" value="0"
+                                   id="inputSmall" name="quantity">
+                            <label class="col-form-label col-form-label-sm" for="inputSmall">Prix</label>
+                            <input class="form-control form-control-sm" type="number" value="0"
+                                   id="inputSmall" name="price">
+                            <label class="col-form-label col-form-label-sm" for="inputSmall">Date</label>
+                            <input class="form-control form-control-sm" type="date" value=""
+                                   id="inputSmall" name="date">
+                        </div>
+
+                        <!-- Modal footer -->
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-success">Enregistrer
+                            </button>
+                            <button type="reset" class="btn btn-danger ml-2" data-dismiss="modal">Annuler
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+            </form>
+        </div>
+        <table id="example" class="display table table-striped table-hover" style="width:100%">
+            <thead>
+            <tr>
+                <th>Produit</th>
+                <th>Quantité</th>
+                <th>Prix</th>
+                <th>Date</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for transaction in all_sell %}
+                <tr>
+                    <td>{{ transaction.product }}</td>
+                    <td>{{ transaction.quantity }}</td>
+                    <td>{{ transaction.price }}</td>
+                    <td data-sort="{{ transaction.date|date:"Ymd" }}">{{ transaction.date|date:"d/m/Y" }}</td>
+                    <td>
+                        <button class="btn btn-outline-success"><i class="fa fa-edit"></i></button>
+                        <button class="btn btn-outline-danger deleteSell" data-id="{{ transaction.id }}"><i
+                                class="fa fa-trash"></i></button>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
+
+{% block javascript %}
+    <script type="text/javascript" src="https://cdn.datatables.net/v/bs4/dt-1.10.20/datatables.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#example').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.10.20/i18n/French.json"
+                },
+                "order": [[3, "desc"]]
+            });
+
+            $('.deleteSell').click(function () {
+                rep = confirm("Vous êtes sûr de supprimer cette transaction ?");
+                if (rep == true) {
+                    trans_id = $(this).data("id");
+                    path = "{% url 'Rtournage:del_sell' 123456789 %}".replace('123456789', trans_id)
+                    $.get(path, function () {
+                        alert("La transaction est supprimée avec succées")
+                        window.location.href = "{% url 'Rtournage:sell' %}";
+
+                    });
+                }
+            });
+
+
+        });
+    </script>
+{% endblock %}

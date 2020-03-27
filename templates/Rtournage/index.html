@@ -1,0 +1,201 @@
+{% extends 'layout.html' %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/dt-1.10.20/datatables.min.css"/>
+{% endblock %}
+
+{% block content %}
+    <div class="container mt-3">
+        <h1>
+            Produits
+            <button class="btn btn-outline-dark mr-3" data-toggle="modal" data-target="#myModal"><i
+                    class="fa fa-plus"></i> Ajouter produit
+            </button>
+        </h1>
+        <hr class="mb-5">
+        <div class="modal fade" id="myModal">
+            <form action="{% url 'Rtournage:add_prod' %}" method="post">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+
+                        <!-- Modal Header -->
+                        <div class="modal-header">
+                            <h4 class="modal-title">Ajout d'un produit</h4>
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        </div>
+
+                        <!-- Modal body -->
+                        <div class="modal-body">
+                            <div class="form-group">
+                                {% csrf_token %}
+                                <div class="form-group">
+                                    <select class="custom-select" name="cat_id">
+                                        <option selected="" disabled>Sélectionner une catégorie</option>
+                                        {% for category in all_category %}
+                                            <option value="{{ category.id }}">{{ category.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <label class="col-form-label col-form-label-sm" for="inputSmall">Type</label>
+                                <input class="form-control form-control-sm" type="text"
+                                       id="inputSmall" name="type" value="">
+                                <label class="col-form-label col-form-label-sm" for="inputSmall">Réference</label>
+                                <input class="form-control form-control-sm" type="text"
+                                       id="inputSmall" name="ref" value="">
+                                <label class="col-form-label col-form-label-sm" for="inputSmall">Qantité</label>
+                                <input class="form-control form-control-sm" type="number" value="0"
+                                       id="inputSmall" name="quantity">
+                                <label class="col-form-label col-form-label-sm" for="inputSmall">Quantité
+                                    minimale</label>
+                                <input class="form-control form-control-sm" type="number" value="0"
+                                       id="inputSmall" name="min">
+                                <label class="col-form-label col-form-label-sm" for="inputSmall">Quantité
+                                    maximale</label>
+                                <input class="form-control form-control-sm" type="number" value="0"
+                                       id="inputSmall" name="max">
+                            </div>
+                        </div>
+
+                        <!-- Modal footer -->
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-success">Enregistrer
+                            </button>
+                            <button type="reset" class="btn btn-danger ml-2" data-dismiss="modal">Annuler
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <table id="example" class="display table table-striped table-hover" style="width:100%">
+            <thead>
+            <tr>
+                <th>Catégorie</th>
+                <th>Type</th>
+                <th>Réference</th>
+                <th>Quantité</th>
+                <th>Alert</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for product in all_product %}
+                <tr>
+                    <td>{{ product.category.name }}</td>
+                    <td>{% if product.type %}{{ product.type }} {% endif %}</td>
+                    <td>{{ product.reference }}</td>
+                    <td>{{ product.quantity }}</td>
+                    <td>Min: {{ product.min_limit_alert }} | Max: {{ product.max_limit_alert }}</td>
+
+                    <td>
+                        <button class="btn btn-outline-success" data-toggle="modal" data-target="#myModel{{ forloop.counter }}"><i
+                                class="fa fa-edit"></i></button>
+                        <div class="modal fade" id="myModel{{ forloop.counter }}">
+                            <form action="{% url 'Rtournage:edit_prod' %}" method="post">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+
+                                        <!-- Modal Header -->
+                                        <div class="modal-header">
+                                            <h4 class="modal-title">Editer le produit</h4>
+                                            <button type="button" class="close" data-dismiss="modal">x</button>
+                                        </div>
+
+                                        <!-- Modal body -->
+                                        <div class="modal-body">
+                                            <div class="form-group">
+                                                {% csrf_token %}
+                                                <div class="form-group">
+                                                    <select class="custom-select" name="cat_id">
+                                                        <option selected="" disabled>Sélectionner une catégorie</option>
+                                                        {% for category in all_category %}
+                                                            <option value="{{ category.id }}">{{ category.name }}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                                <label class="col-form-label col-form-label-sm"
+                                                       for="inputSmall">Type</label>
+                                                <input class="form-control form-control-sm" type="text"
+                                                       placeholder="Saisir le nom de la nouvelle catégorie"
+                                                       id="inputSmall" name="type" value="{{ product.type }}">
+                                                <label class="col-form-label col-form-label-sm"
+                                                       for="inputSmall">Réference</label>
+                                                <input class="form-control form-control-sm" type="text"
+                                                       placeholder="Saisir le nom de la nouvelle catégorie"
+                                                       id="inputSmall" name="ref" value="{{ product.reference }}">
+                                                <label class="col-form-label col-form-label-sm"
+                                                       for="inputSmall">Quantité</label>
+                                                <input class="form-control form-control-sm" type="text"
+                                                       placeholder="Saisir le nom de la nouvelle catégorie"
+                                                       id="inputSmall" name="quantity" value="{{ product.quantity }}">
+                                                <label class="col-form-label col-form-label-sm"
+                                                       for="inputSmall">Quantité minimale</label>
+                                                <input class="form-control form-control-sm" type="text"
+                                                       placeholder="Saisir le nom de la nouvelle catégorie"
+                                                       id="inputSmall" name="min" value="{{ product.min_limit_alert }}">
+                                                <label class="col-form-label col-form-label-sm"
+                                                       for="inputSmall">Quantité maximale</label>
+                                                <input class="form-control form-control-sm" type="text"
+                                                       placeholder="Saisir le nom de la nouvelle catégorie"
+                                                       id="inputSmall" name="max" value="{{ product.max_limit_alert }}">
+                                                <input type="hidden" name="prod_id" value="{{ product.id }}">
+                                            </div>
+                                        </div>
+
+                                        <!-- Modal footer -->
+                                        <div class="modal-footer">
+                                            <button type="submit" class="btn btn-success">Enregistrer
+                                            </button>
+                                            <button type="reset" class="btn btn-danger ml-2" data-dismiss="modal">
+                                                Annuler
+                                            </button>
+                                        </div>
+
+                                    </div>
+                                </div>
+                        </div>
+                        <button class="btn btn-outline-danger deletePod" data-type="{{ product.type }}"
+                                data-id="{{ product.id }}"><i class="fa fa-trash"></i></button>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
+
+{% block javascript %}
+    <script type="text/javascript" src="https://cdn.datatables.net/v/bs4/dt-1.10.20/datatables.min.js"></script>
+    <script>
+        $(document).ready(function () {
+
+            $('#example').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.10.20/i18n/French.json"
+                }
+            });
+
+            $('.deletePod').click(function () {
+                prod_name = $(this).data("type");
+                rep = confirm("Vous êtes sûr de supprimer le produit " + prod_name + " ?");
+                if (rep == true) {
+                    prod_id = $(this).data("id");
+                    path = "{% url 'Rtournage:del_prod' 123456789 %}".replace('123456789', prod_id)
+                    $.get(path, function (response, status) {
+                        console.log(response)
+                        if (response['status'] == 'success') {
+                            alert('Le produit ' + prod_name + " est supprimé avec succées")
+                            window.location.href = "{% url 'Rtournage:index' %}";
+                        } else {
+                            alert('Le produit ' + prod_name + " ne peut pas être supprimée car elle contient des transactions")
+                        }
+                    });
+                }
+            });
+
+        });
+
+    </script>
+{% endblock %}
